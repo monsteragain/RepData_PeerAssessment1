@@ -9,18 +9,21 @@ output:
 ## Loading and preprocessing the data
 Though this is superfluous to the assignment, I'll use the code to check if the data file exists and unzip the activity.zip file provided in the repository if activity.csv doesn't exist.  
 
-```{r, echo = TRUE}
+
+```r
 if (!file.exists("activity.csv")) {
         unzip("activity.zip")
 }
 ```
 
 Now load the data  
-```{r, echo = TRUE}
+
+```r
 data <- read.csv("activity.csv")
 ```
 Create a summary data table with total number of steps per each date
-```{r,echo=TRUE}
+
+```r
 ##get a vector of dates
 dates <- levels(data$date)
 ##create a vector to store total steps for each date
@@ -37,24 +40,38 @@ for (i in 1:length(dates)) {
 
 ## What is mean total number of steps taken per day?
 Now create histogram of total steps per day
-```{r,echo=TRUE}
+
+```r
 hist(totaldaily,main="Total steps per day",xlab="")
 ```
+
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
   
 Calculate mean based on totaldaily data (total steps per day)  
 
-```{r,echo=TRUE}
+
+```r
 mean(totaldaily,na.rm=T)
 ```
 
+```
+## [1] 10766.19
+```
+
 Calculate median based on totaldaily data (total steps per day)
-```{r,echo=TRUE}
+
+```r
 median(totaldaily,na.rm=T)
+```
+
+```
+## [1] 10765
 ```
 
 ## What is the average daily activity pattern?
 Calculate average number of steps in each 5-minute interval, averaged across all days
-```{r,echo=TRUE}
+
+```r
 ##vector with intervals ids
 intervals <- unique(data$interval)
 ##create vector to store averaged steps per each 5-minute interval
@@ -67,29 +84,43 @@ for (a in 1:length(intervals)) {
 }
 ```
 Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis) 
-```{r,echo=TRUE}
+
+```r
 plot(intervals,intmeansteps,type="l",main="Average number of steps per each 5-minute interval",xlab="Intervals IDs",ylab="Average Number of Steps")
 ```
 
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
+
 Find out which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps
 
-```{r,echo=TRUE}
+
+```r
 ##find the index of the max in intmeansteps, then find the Interval ID by that index
 index <- which(intmeansteps==max(intmeansteps))
 intervals[index]
+```
+
+```
+## [1] 835
 ```
 
 ## Imputing missing values
 
 Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
 Considering that NAs are only present in the first column, to find out the total number of NAs we'll just need to count the rows which are not complete cases.
-```{r,echo=TRUE}
+
+```r
 nrow(data[!complete.cases(data), ])
+```
+
+```
+## [1] 2304
 ```
 
 Filling in all of the missing values in the dataset. It makes sense to fill in the average for each 5-minute interval, averaged across all days. Logic is it's more likely for a person to perform similar number of steps in the same time intervals across all days. I'm going to reuse 'intervals' and 'intmeansteps' vectors from the previous computations.
 
-```{r,echo=TRUE}
+
+```r
 ##create new dataset
 newdata <- data
 ##find indices of the rows with NAs
@@ -108,7 +139,8 @@ for (b in 1:length(indices)) {
 
 Now, wih the new dataset, calculate the total steps per each day
 
-```{r,echo=TRUE}
+
+```r
 ##get a vector of dates
 dates <- levels(newdata$date)
 ##create a vector to store total steps for each date
@@ -123,19 +155,32 @@ for (i in 1:length(dates)) {
 
 With the new dataset, make a histogram of the total number of steps taken each day
 
-```{r,echo=TRUE}
+
+```r
 hist(newtotaldaily,main="Total steps per day",xlab="")
 ```
 
+![plot of chunk unnamed-chunk-13](figure/unnamed-chunk-13-1.png) 
+
 With the new dataset, calculate mean based on totaldaily data (total steps per day)  
 
-```{r,echo=TRUE}
+
+```r
 mean(newtotaldaily,na.rm=T)
 ```
 
+```
+## [1] 10766.19
+```
+
 With the new dataset, calculate median based on totaldaily data (total steps per day)
-```{r,echo=TRUE}
+
+```r
 median(newtotaldaily,na.rm=T)
+```
+
+```
+## [1] 10766.19
 ```
 
 As we can see, filling in average number of steps for each interval tha was NA in the original data, almost didn't affect the mean and median - they've changed ever so slightly.
@@ -144,7 +189,8 @@ On the other hand, the total daily number of steps is different for those days t
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r,echo=TRUE}
+
+```r
 ##create a vector with weekdays out of dates from the dataset
 daynames <- weekdays(as.POSIXlt(newdata$date,format="%Y-%m-%d"))
 ##create a factor with 'weekday' and 'weekend' out of daynames vector
@@ -157,7 +203,8 @@ newdata <- cbind(newdata,weekdays)
 
 Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
 
-```{r,echo=TRUE}
+
+```r
 ##at first, find the average number of steps per each 5-min interval,averaged across all weekday/weekend days
 ##vector with intervals ids
 intervals <- unique(newdata$interval)
@@ -184,15 +231,16 @@ df1 <- data.frame("Number of steps"=weekdaysmeansteps,"interval"=intervals,"week
 df2 <- data.frame("Number of steps"=weekendsmeansteps,"interval"=intervals,"weekdays"=rep("weekend",length(weekendsmeansteps)))
 ##rbind two dataframes into one, which we will use for a plot
 newestdata <- rbind(df1,df2)
-
 ```
 
 Now the plot itself.
 
-```{r,echo=TRUE}
+
+```r
 library(lattice)
 xyplot(Number.of.steps ~ interval|weekdays,newestdata,type="l",layout=c(1,2))
-
 ```
+
+![plot of chunk unnamed-chunk-18](figure/unnamed-chunk-18-1.png) 
 
 As we can clearly see, there are differences in activity patterns between weekdays and weekends
